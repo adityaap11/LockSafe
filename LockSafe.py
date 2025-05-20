@@ -11,8 +11,8 @@ import base64
 # ---------------------- CONFIG ----------------------
 MASTER_PASSWORD_FILE = "master_password.txt"
 PASSWORDS_FILE = "passwords.txt"
-os.environ["SENDER_EMAIL"] = "noreplylocksafe@gmail.com"
-os.environ["SENDER_PASSWORD"] = "tkwc ugyl larn cstk"
+os.environ["SENDER_EMAIL"] = "enter your admin email"
+os.environ["SENDER_PASSWORD"] = "enter app password for admin email"
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
 
