@@ -1,18 +1,14 @@
-import hashlib
-import random
-import smtplib
-import re
-import os
+import hashlib, random, smtplib, re, os, base64 
 import tkinter as tk
 from tkinter import messagebox, simpledialog
-from Crypto.Cipher import AES
-import base64
+from Crypto.Cipher import AES 
+import time
 
 # ---------------------- CONFIG ----------------------
 MASTER_PASSWORD_FILE = "master_password.txt"
 PASSWORDS_FILE = "passwords.txt"
-os.environ["SENDER_EMAIL"] = "enter your admin email"
-os.environ["SENDER_PASSWORD"] = "enter app password for admin email"
+os.environ["SENDER_EMAIL"] = "  "            #enter registered email
+os.environ["SENDER_PASSWORD"] = "  "         #enter app password for registered email
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 SENDER_PASSWORD = os.getenv("SENDER_PASSWORD")
 
@@ -36,18 +32,21 @@ def decrypt_password(encrypted_password, key):
 
 # ---------------------- UTILS ----------------------
 def send_otp(email):
-    otp = str(random.randint(100000, 999999))
+    otp = str(random.randint(1000, 9999))
+    timestamp = time.time()
     try:
         server = smtplib.SMTP("smtp.gmail.com", 587)
         server.starttls()
         server.login(SENDER_EMAIL, SENDER_PASSWORD)
-        message = f"Subject: Password Reset OTP\n\nYour OTP is: {otp}"
+        message = f"Subject: Password Reset OTP\n\nYour OTP is: {otp}\nThis OTP is valid for next 2 minutes only."
         server.sendmail(SENDER_EMAIL, email, message)
         server.quit()
-        return otp
+        return otp, timestamp
     except Exception as e:
         messagebox.showerror("Error", f"Failed to send OTP: {e}")
-        return None
+        return None, None
+
+
 
 def check_password_strength(password):
     if len(password) < 8:
@@ -63,8 +62,9 @@ def check_password_strength(password):
     return "Strong"
 
 # ---------------------- FUNCTIONALITY ----------------------
+
 def create_account():
-    platform = entry_platform.get()
+    platform = entry_platform.get().strip().lower()
     username = entry_username.get()
     email = entry_email.get()
     password = entry_password.get()
@@ -73,11 +73,27 @@ def create_account():
         messagebox.showwarning("Warning", "All fields are required!")
         return
 
-    otp = send_otp(email)
+    if os.path.exists(PASSWORDS_FILE):
+        with open(PASSWORDS_FILE, "r") as f:
+            for line in f:
+                try:
+                    saved_platform, saved_username, _, _ = line.strip().split(",")
+                    if saved_platform == platform and saved_username == username:
+                        messagebox.showerror("Error", "This username is already registered on this platform!")
+                        return
+                except ValueError:
+                    continue
+
+    otp, otp_time = send_otp(email)
     if not otp:
         return
 
     user_otp = simpledialog.askstring("OTP Verification", "Enter the OTP sent to your email:")
+
+    if time.time() - otp_time > 120:
+        messagebox.showerror("Expired", "OTP has expired!")
+        return
+
     if user_otp != otp:
         messagebox.showerror("Error", "Incorrect OTP!")
         return
@@ -85,14 +101,20 @@ def create_account():
     encryption_key = "key123"
     encrypted_password = encrypt_password(password, encryption_key)
 
-    with open(PASSWORDS_FILE, "a") as f:
-        f.write(f"{platform},{username},{email},{encrypted_password}\n")
 
-    messagebox.showinfo("Success", "Account created successfully!")
+    try:
+        with open(PASSWORDS_FILE, "a") as f:
+            f.write(f"{platform},{username},{email},{encrypted_password}\n")
+        messagebox.showinfo("Success", "Account created successfully!")
+    except Exception as e:
+        messagebox.showerror("Error", f"Failed to save account: {e}")
+        return
+
     entry_platform.delete(0, tk.END)
     entry_username.delete(0, tk.END)
     entry_email.delete(0, tk.END)
     entry_password.delete(0, tk.END)
+
 
 def forgot_user_password():
     username = simpledialog.askstring("Forgot Password", "Enter your username:")
@@ -114,17 +136,21 @@ def forgot_user_password():
         messagebox.showerror("Error", "Username not found!")
         return
 
-    otp = send_otp(email)
+    
+    otp, otp_time = send_otp(email)
     if not otp:
-        return
+       return
 
     user_otp = simpledialog.askstring("OTP Verification", "Enter the OTP sent to your email:")
+    if time.time() - otp_time > 120:
+       messagebox.showerror("Expired", "OTP has expired!")
+       return
     if user_otp != otp:
-        messagebox.showerror("Error", "Incorrect OTP!")
-        return
+       messagebox.showerror("Error", "Incorrect OTP!")
+       return
 
     new_password = simpledialog.askstring("Reset Password", "Enter new password:", show="*")
-    encryption_key = "my_secure_key_123"
+    encryption_key = "key123"
     encrypted_password = encrypt_password(new_password, encryption_key)
 
     with open(PASSWORDS_FILE, "w") as f:
@@ -174,12 +200,20 @@ def forgot_master_password():
     if not recovery_email:
         messagebox.showwarning("Warning", "Email cannot be empty!")
         return
+    
+    if recovery_email != SENDER_EMAIL:
+        messagebox.showwarning("Warning", "Recovery Email doesn't match.")
 
-    otp = send_otp(recovery_email)
+    otp, otp_time = send_otp(recovery_email)
     if not otp:
         return
 
     user_otp = simpledialog.askstring("OTP Verification", "Enter the OTP sent to your email:")
+
+    if time.time() - otp_time > 120:
+        messagebox.showerror("Expired", "OTP has expired!")
+        return
+
     if user_otp != otp:
         messagebox.showerror("Error", "Incorrect OTP!")
         return
@@ -206,6 +240,15 @@ def forgot_master_password():
 
         messagebox.showinfo("Success", "Master password has been reset successfully!")
         break
+
+def verify_master_password():
+    if os.path.exists(MASTER_PASSWORD_FILE):
+        with open(MASTER_PASSWORD_FILE, "r") as f:
+            stored_hash = f.read().strip()
+        entered_password = simpledialog.askstring("Verify", "Enter master password:", show="*")
+        return hash_password(entered_password) == stored_hash
+    return False
+
 
 def verify_master_password():
     if os.path.exists(MASTER_PASSWORD_FILE):
@@ -247,14 +290,14 @@ def view_saved_passwords():
                 text_area.insert(tk.END, f"Error reading entry: {e}\n\n")
 
 # ---------------------- GUI ----------------------
+
+setup_master_password()
+
 root = tk.Tk()
 root.title("LockSafe - Secure Password Manager")
 root.geometry("800x600")
 root.configure(bg="#ffffff")
-root.resizable(False, False)
-
-setup_master_password()
-
+root.resizable(True, True)
 header = tk.Frame(root, bg="#0d47a1", height=60)
 header.pack(fill="x")
 tk.Label(header, text="🔐 LockSafe", font=("Helvetica", 20, "bold"), fg="white", bg="#0d47a1").pack(pady=10)
