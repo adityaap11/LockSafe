@@ -206,7 +206,7 @@ Feel free to use, modify, and distribute with attribution.
 ## 👤 Author
 
 **Aditya Prakash**  
-B.Tech Graduate | Software Development Trainee  
+B.Tech (CSE) | Software Developer  
 [GitHub](https://github.com/adityaap11) · [LinkedIn](https://www.linkedin.com/in/aditya-prakash-ap)
 
 ***
