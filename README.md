@@ -207,7 +207,7 @@ Feel free to use, modify, and distribute with attribution.
 
 **Aditya Prakash**  
 B.Tech Graduate | Software Development Trainee  
-[GitHub](https://github.com/your-username) · [LinkedIn](https://linkedin.com/in/your-profile)
+[GitHub](https://github.com/adityaap11) · [LinkedIn](https://www.linkedin.com/in/aditya-prakash-ap)
 
 ***
 
