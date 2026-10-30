@@ -28,12 +28,12 @@ LockSafe is a lightweight, desktop-based password manager built with Python and 
 <img width="200" height="100" alt="image" src="https://github.com/user-attachments/assets/d9b8e7bf-9c0f-4e04-91bb-6ffa30e080ba" />
 
 ## Main Dashboard
-<img width="200" height="150" alt="image" src="https://github.com/user-attachments/assets/c12fe9ca-354e-4912-b01c-1b110f0d9f01" />
+<img width="500" height="350" alt="image" src="https://github.com/user-attachments/assets/c12fe9ca-354e-4912-b01c-1b110f0d9f01" />
 
 ## Saved Passwords
-<img width="200" height="150" alt="image" src="https://github.com/user-attachments/assets/699e0dc5-ce2e-4e0f-b92c-1ee770ac8bce" />
+<img width="400" height="250" alt="image" src="https://github.com/user-attachments/assets/699e0dc5-ce2e-4e0f-b92c-1ee770ac8bce" />
 
-## Password Recovery
+## OTP Verification
 <img width="200" height="150" alt="image" src="https://github.com/user-attachments/assets/2b9f22c2-0365-4135-89fe-1a909df70715" />
 
 
