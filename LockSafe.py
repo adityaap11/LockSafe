@@ -249,15 +249,6 @@ def verify_master_password():
         return hash_password(entered_password) == stored_hash
     return False
 
-
-def verify_master_password():
-    if os.path.exists(MASTER_PASSWORD_FILE):
-        with open(MASTER_PASSWORD_FILE, "r") as f:
-            stored_hash = f.read().strip()
-        entered_password = simpledialog.askstring("Verify", "Enter master password:", show="*")
-        return hash_password(entered_password) == stored_hash
-    return False
-
 def view_saved_passwords():
     if not os.path.exists(PASSWORDS_FILE) or os.stat(PASSWORDS_FILE).st_size == 0:
         messagebox.showinfo("Info", "No saved passwords yet!")
